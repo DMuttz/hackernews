@@ -1,25 +1,40 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import logo from "./logo.svg";
+import "./App.css";
+import ListItem from "./listItem";
 
 class App extends Component {
+  state = {
+    stories: []
+  };
+
+  componentDidMount() {
+    fetch("https://hacker-news.firebaseio.com/v0/topstories.json")
+      .then(data => data.json())
+      .then(data => {
+        const formattedData = data.slice(0, 30);
+        formattedData.forEach(id => {
+          fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`)
+            .then(newsData => newsData.json())
+            .then(newsData => {
+              // const newStories = this.state.stories.slice();
+              // newStories.push(newsData);
+              this.setState({ stories: [...this.state.stories, newsData] });
+            });
+        });
+      });
+  }
+
+  renderListItems() {
+    return this.state.stories.map((item, index) => {
+      return <ListItem key={index} title={item.title} url={item.url} />;
+    });
+  }
+
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div>
+        <ol>{this.renderListItems()}</ol>
       </div>
     );
   }
